@@ -1,0 +1,23 @@
+﻿/* This ensures the footer sticks to bottom when content is short */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    min-height: calc(100vh - 60px); /* leave space for footer */
+}
+
+.content {
+    padding: 20px;
+}
+
+.footer {
+    height: 60px;
+    line-height: 60px;
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    width: 100%;
+}
