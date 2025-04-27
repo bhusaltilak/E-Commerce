@@ -1,67 +1,137 @@
 ﻿@page
 @model RegisterModel
-@{
-    ViewData["Title"] = "Register";
-}
 
-<h1>@ViewData["Title"]</h1> 
-
-<div class="row">
-    <div class="col-md-4">
+<div class="card shadow-lg border-0 mt-5 rounded-4">
+    <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+        <h2 class="fw-bold">Register</h2>
+    </div>
+    <div class="card-body px-5 py-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <h4 class="text-center text-muted mb-4">Create a new account</h4>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
             <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
+                <input asp-for="Input.Email" class="form-control rounded-pill ps-4" placeholder="name@example.com" />
+                <label asp-for="Input.Email" class="text-muted">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+            <div class="row g-3">
+                <div class="form-floating mb-3 col-md-6">
+                    <input asp-for="Input.Name" class="form-control rounded-pill ps-4" placeholder="State" />
+                    <label asp-for="Input.Name" class="text-muted">Full Name</label>
+                    <span asp-validation-for="Input.Name" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3 col-md-6">
+                    <input asp-for="Input.PhoneNumber" class="form-control rounded-pill ps-4" placeholder="PhoneNumber" />
+                    <label asp-for="Input.PhoneNumber" class="text-muted">PhoneNumber</label>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                </div>
+
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input asp-for="Input.Password" class="form-control rounded-pill ps-4" placeholder="Password" />
+                    <label asp-for="Input.Password" class="text-muted">Password</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3 col-md-6">
+                    <input asp-for="Input.ConfirmPassword" class="form-control rounded-pill ps-4" placeholder="Confirm Password" />
+                    <label asp-for="Input.ConfirmPassword" class="text-muted">Confirm Password</label>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+          
+
+            <div class="form-floating mb-3 col-md-6">
+                <input asp-for="Input.StreetAddress" class="form-control rounded-pill ps-4" placeholder="StreetAddress" />
+                <label asp-for="Input.StreetAddress" class="text-muted">StreetAddress</label>
+                <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+            <div class="form-floating mb-3 col-md-6">
+                <input asp-for="Input.City" class="form-control rounded-pill ps-4" placeholder="City" />
+                <label asp-for="Input.City" class="text-muted">City</label>
+                <span asp-validation-for="Input.City" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+
+            <div class="form-floating mb-3 col-md-6">
+                <input asp-for="Input.State" class="form-control rounded-pill ps-4" placeholder="State" />
+                <label asp-for="Input.State" class="text-muted">State</label>
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3 col-md-6">
+                <input asp-for="Input.PostalCode" class="form-control rounded-pill ps-4" placeholder="PostalCode" />
+                <label asp-for="Input.PostalCode" class="text-muted">PostalCode</label>
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3 col-md-6">
+                <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select rounded-pill ps-4">
+                    <option disabled selected>- Select Role -</option>
+                </select>
+               
+            </div>
+                <div class="form-floating mb-3 col-md-6">
+                    <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select rounded-pill ps-4">
+                        <option disabled selected>- Select Company -</option>
+                    </select>
+                   
+                </div>
+
+            </div>
+
+            <div class="d-grid mb-4">
+                <button type="submit" class="btn btn-lg btn-success rounded-pill">Register</button>
+            </div>
         </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
+
+        <hr class="my-4" />
+        <div class="text-center mb-3">
+            <p class="text-muted">Or sign up using</p>
+        </div>
+
+        <div class="text-center">
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
+                                <p>
+                                    No external login providers configured.
+                                    <a href="https://go.microsoft.com/fwlink/?LinkID=532715">Learn how to add them</a>.
+                                </p>
                 }
                 else
                 {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
+                                <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                    @foreach (var provider in Model.ExternalLogins!)
+                        {
+                                        <button type="submit" class="btn btn-outline-dark m-1 rounded-pill px-4" name="provider" value="@provider.Name">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>@provider.DisplayName
+                                        </button>
+                        }
+                                </form>
                 }
             }
-        </section>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function (){
+            $('#Input_CompanyId').hide();
+
+            $('#Input_Role').change(function () {
+                var selection = $('#Input_Role Option:selected').text();
+                if (selection == 'Company') {
+                    $('#Input_CompanyId').show();
+                } 
+                else {
+                    $('#Input_CompanyId').hide();
+                }
+            })
+        })
+    </script>
 }
