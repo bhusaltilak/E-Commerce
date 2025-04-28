@@ -27,9 +27,17 @@
                             <a asp-action="Details" asp-route-ProductId="@product.Id" class="btn btn-primary flex-fill">
                                 Details
                             </a>
-                           
+                            <form asp-action="AddToCart" asp-controller="Cart" asp-route-returnUrl="@Context.Request.Path" method="post" class="flex-fill">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <button type="submit" class="btn btn-success w-100">
+                                  Add to cart
+                                </button>
+                            </form>
+
                         </div>
                     </div>
+
+
 
 
                 </div>
@@ -37,3 +45,6 @@
         </div>
     }
 </div>
+
+
+

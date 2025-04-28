@@ -25,12 +25,13 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             ShoppingCartVM = new ShoppingCartVM()
             {
                 ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId,
-                includeProperties: "Product")
+                includeProperties: "Product"),
+                OrderHeader = new()
             };
             foreach (var cart in ShoppingCartVM.ShoppingCartList)
             {
                 cart.Price = GetPriceBasedQuantity(cart);
-                ShoppingCartVM.OrderTotal += (cart.Price * cart.Count);
+                ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
 
             return View(ShoppingCartVM);
@@ -38,7 +39,32 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         public IActionResult Summary()
         {
-            return View();
+			var claimsIdentity = (ClaimsIdentity)User.Identity;
+			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+			ShoppingCartVM = new ShoppingCartVM()
+			{
+				ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId,
+				includeProperties: "Product"),
+				OrderHeader = new()
+			};
+
+           ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.Get(U=>U.Id == userId);
+
+            ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+            ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+            ShoppingCartVM.OrderHeader.StreetAddress = ShoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
+            ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
+            ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
+            ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+
+			foreach (var cart in ShoppingCartVM.ShoppingCartList)
+			{
+				cart.Price = GetPriceBasedQuantity(cart);
+				ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+			}
+
+			return View(ShoppingCartVM);
         }
 
 
@@ -56,7 +82,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             var cartFromDb = _unitOfWork.ShoppingCart.Get(u => u.Id == CartId);
             if (cartFromDb.Count <= 1)
             {
-                //remove that from cart
+               
                 _unitOfWork.ShoppingCart.Remove(cartFromDb);
             }
             else
@@ -94,6 +120,53 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 }
             }
         }
+
+        //Doing for cart added through the home Index by clicking the Add cart button added product to the cart by 1
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToCart(int productId, string returnUrl)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account"); 
+            }
+
+            var cartFromDb = _unitOfWork.ShoppingCart.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
+
+            if (cartFromDb != null)
+            {
+               
+                cartFromDb.Count += 1;
+                _unitOfWork.ShoppingCart.Update(cartFromDb);
+            }
+            else
+            {
+               
+                ShoppingCart cart = new()
+                {
+                    ApplicationUserId = userId,
+                    ProductId = productId,
+                    Count = 1
+                };
+                _unitOfWork.ShoppingCart.Add(cart);
+            }
+
+            _unitOfWork.Save();
+
+            TempData["success"] = "Product Added!";
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+
 
     }
 }
