@@ -1,4 +1,7 @@
-﻿html, body {
+﻿<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" / >
+
+
+html, body {
     height: 100%;
     margin: 0;
     padding: 0;

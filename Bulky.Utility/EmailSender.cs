@@ -16,5 +16,5 @@ namespace BulkyBook.Utility
             //logic to send email
             return Task.CompletedTask;  
         }
-    }
+    } 
 }

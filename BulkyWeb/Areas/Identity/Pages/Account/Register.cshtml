@@ -3,7 +3,16 @@
 
 <div class="card shadow-lg border-0 mt-5 rounded-4">
     <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+
+        @if (User.IsInRole(SD.Role_Admin))
+        {
+            <h2 class="fw-bold">Register - ADMIN PORTAL</h2>
+        }
+        else{
         <h2 class="fw-bold">Register</h2>
+        } 
+       
+
     </div>
     <div class="card-body px-5 py-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
@@ -67,53 +76,60 @@
                 <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
             </div>
 
-            <div class="form-floating mb-3 col-md-6">
-                <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select rounded-pill ps-4">
-                    <option disabled selected>- Select Role -</option>
-                </select>
-               
-            </div>
-                <div class="form-floating mb-3 col-md-6">
-                    <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select rounded-pill ps-4">
-                        <option disabled selected>- Select Company -</option>
-                    </select>
-                   
-                </div>
+                @if (User.IsInRole(SD.Role_Admin))
+                {
+                    <div class="form-floating mb-3 col-md-6">
+                        <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select rounded-pill ps-4">
+                            <option disabled selected>- Select Role -</option>
+                        </select>
 
-            </div>
+                    </div>
+                    <div class="form-floating mb-3 col-md-6">
+                        <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select rounded-pill ps-4">
+                            <option disabled selected>- Select Company -</option>
+                        </select>
 
+                    </div>
+                }
+            </div>
+                
             <div class="d-grid mb-4">
                 <button type="submit" class="btn btn-lg btn-success rounded-pill">Register</button>
             </div>
         </form>
 
         <hr class="my-4" />
-        <div class="text-center mb-3">
-            <p class="text-muted">Or sign up using</p>
-        </div>
+        @if (!User.IsInRole(SD.Role_Admin))
+        {
+            <div>
+                <div class="text-center mb-3">
+                    <p class="text-muted">Or sign up using</p>
+                </div>
 
-        <div class="text-center">
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                                <p>
-                                    No external login providers configured.
-                                    <a href="https://go.microsoft.com/fwlink/?LinkID=532715">Learn how to add them</a>.
-                                </p>
-                }
-                else
-                {
-                                <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                                    @foreach (var provider in Model.ExternalLogins!)
+                <div class="text-center">
+                    @{
+                        if ((Model.ExternalLogins?.Count ?? 0) == 0)
                         {
-                                        <button type="submit" class="btn btn-outline-dark m-1 rounded-pill px-4" name="provider" value="@provider.Name">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i>@provider.DisplayName
-                                        </button>
+                            <p>
+                                No external login providers configured.
+                                <a href="https://go.microsoft.com/fwlink/?LinkID=532715">Learn how to add them</a>.
+                            </p>
                         }
-                                </form>
-                }
-            }
+                        else
+                        {
+                            <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                @foreach (var provider in Model.ExternalLogins!)
+                                {
+                                    <button type="submit" class="btn btn-outline-dark m-1 rounded-pill px-4" name="provider" value="@provider.Name">
+                                        <i class="bi bi-facebook me-2"></i>@provider.DisplayName
+                                    </button>
+                                }
+                            </form>
+                        }
+                    }
+                </div>
         </div>
+        }
     </div>
 </div>
 

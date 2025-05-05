@@ -12,58 +12,61 @@ using System.Security.Claims;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
-	[Area("Admin")]
+    [Area("admin")]
     [Authorize]
-	public class OrderController : Controller
-	{
+    public class OrderController : Controller
+    {
 
-		private readonly IUnitOfWork _unitOfWork;
+
+        private readonly IUnitOfWork _unitOfWork;
         [BindProperty]
         public OrderVM OrderVM { get; set; }
         public OrderController(IUnitOfWork unitOfWork)
         {
-			_unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
+
         public IActionResult Index()
-		{
-			return View();
-		}
+        {
+            return View();
+        }
 
         public IActionResult Details(int orderId)
         {
-             OrderVM = new()
+            OrderVM = new()
             {
                 OrderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == orderId, includeProperties: "ApplicationUser"),
                 OrderDetail = _unitOfWork.OrderDetail.GetAll(u => u.OrderHeaderId == orderId, includeProperties: "Product")
             };
+
             return View(OrderVM);
         }
         [HttpPost]
-        [Authorize(Roles =SD.Role_Admin+","+SD.Role_Employee)]
-        public IActionResult UpdateOrderDetail(int orderId)
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult UpdateOrderDetail()
         {
             var orderHeaderFromDb = _unitOfWork.OrderHeader.Get(u => u.Id == OrderVM.OrderHeader.Id);
-            orderHeaderFromDb.Name= OrderVM.OrderHeader.Name;
-            orderHeaderFromDb.PhoneNumber= OrderVM.OrderHeader.PhoneNumber;
-            orderHeaderFromDb.StreetAddress= OrderVM.OrderHeader.StreetAddress;
-            orderHeaderFromDb.City= OrderVM.OrderHeader.City;
-            orderHeaderFromDb.State= OrderVM.OrderHeader.State;
-            orderHeaderFromDb.PostalCode= OrderVM.OrderHeader.PostalCode;
-
+            orderHeaderFromDb.Name = OrderVM.OrderHeader.Name;
+            orderHeaderFromDb.PhoneNumber = OrderVM.OrderHeader.PhoneNumber;
+            orderHeaderFromDb.StreetAddress = OrderVM.OrderHeader.StreetAddress;
+            orderHeaderFromDb.City = OrderVM.OrderHeader.City;
+            orderHeaderFromDb.State = OrderVM.OrderHeader.State;
+            orderHeaderFromDb.PostalCode = OrderVM.OrderHeader.PostalCode;
             if (!string.IsNullOrEmpty(OrderVM.OrderHeader.Carrier))
             {
                 orderHeaderFromDb.Carrier = OrderVM.OrderHeader.Carrier;
             }
             if (!string.IsNullOrEmpty(OrderVM.OrderHeader.TrackingNumber))
             {
-                orderHeaderFromDb.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+                orderHeaderFromDb.Carrier = OrderVM.OrderHeader.TrackingNumber;
             }
             _unitOfWork.OrderHeader.Update(orderHeaderFromDb);
             _unitOfWork.Save();
 
-            TempData["Success"] = "Order Details Updated Successfully,";
+            TempData["Success"] = "Order Details Updated Successfully.";
 
-            return RedirectToAction(nameof(Details), new {orderId = orderHeaderFromDb.Id});
+
+            return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDb.Id });
         }
 
 
@@ -77,7 +80,6 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
         }
 
-
         [HttpPost]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult ShipOrder()
@@ -90,7 +92,9 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             orderHeader.ShippingDate = DateTime.Now;
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
-                orderHeader.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(20));
+                orderHeader.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+
+
             }
 
             _unitOfWork.OrderHeader.Update(orderHeader);
@@ -98,21 +102,21 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             TempData["Success"] = "Order Shipped Successfully.";
             return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
         }
-      
-
         [HttpPost]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult CancelOrder()
         {
-            var orderHeader = _unitOfWork.OrderHeader.Get(u=>u.Id==OrderVM.OrderHeader.Id);
-            if(orderHeader.PaymentStatus ==SD.PaymentStatusApproved)
+
+            var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == OrderVM.OrderHeader.Id);
+
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
             {
                 var options = new RefundCreateOptions
                 {
                     Reason = RefundReasons.RequestedByCustomer,
                     PaymentIntent = orderHeader.PaymentIntentId
-
                 };
+
                 var service = new RefundService();
                 Refund refund = service.Create(options);
 
@@ -123,22 +127,22 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                 _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
             }
             _unitOfWork.Save();
-            TempData["Success"] = "Order Cancelled Successfully,";
-
+            TempData["Success"] = "Order Cancelled Successfully.";
             return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
 
         }
+
+
 
         [ActionName("Details")]
         [HttpPost]
         public IActionResult Details_PAY_NOW()
         {
-            OrderVM.OrderHeader =_unitOfWork.OrderHeader
-                .Get(u=>u.Id == OrderVM.OrderHeader.Id,includeProperties:"ApplicationUser");
+            OrderVM.OrderHeader = _unitOfWork.OrderHeader
+                .Get(u => u.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser");
             OrderVM.OrderDetail = _unitOfWork.OrderDetail
-                .GetAll(u => u.OrderHeaderId == OrderVM.OrderHeader.Id,includeProperties:"Product");
+                .GetAll(u => u.OrderHeaderId == OrderVM.OrderHeader.Id, includeProperties: "Product");
 
-      
             //stripe logic
             var domain = Request.Scheme + "://" + Request.Host.Value + "/";
             var options = new SessionCreateOptions
@@ -174,16 +178,16 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             _unitOfWork.Save();
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
-
-             }
-
+        }
 
         public IActionResult PaymentConfirmation(int orderHeaderId)
         {
+
             OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == orderHeaderId);
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
                 //this is an order by company
+
                 var service = new SessionService();
                 Session session = service.Get(orderHeader.SessionId);
 
@@ -193,7 +197,10 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                     _unitOfWork.OrderHeader.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
+
+
             }
+
 
             return View(orderHeaderId);
         }
@@ -201,24 +208,27 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
 
 
         #region API CALLS
+
         [HttpGet]
         public IActionResult GetAll(string status)
         {
             IEnumerable<OrderHeader> objOrderHeaders;
+
+
             if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
             {
                 objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
-
             }
             else
             {
+
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-                objOrderHeaders = _unitOfWork.OrderHeader.GetAll(u => u.ApplicationUserId == userId, includeProperties: "ApplicationUser");
-
-
+                objOrderHeaders = _unitOfWork.OrderHeader
+                    .GetAll(u => u.ApplicationUserId == userId, includeProperties: "ApplicationUser");
             }
+
 
             switch (status)
             {
@@ -236,11 +246,14 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                     break;
                 default:
                     break;
+
             }
 
 
             return Json(new { data = objOrderHeaders });
         }
+
+
         #endregion
     }
 }

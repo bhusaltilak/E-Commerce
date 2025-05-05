@@ -10,23 +10,26 @@
     <title>@ViewData["Title"] - BulkyBookWeb</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BulkyBookWeb.styles.css" asp-append-version="true" />
 
-
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
 </head>
 <body class="d-flex flex-column min-vh-100">
 
    <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-primary border-bottom box-shadow py-2">
             <div class="container-fluid px-2">
-                <a class="navbar-brand small" asp-area="" asp-controller="Home" asp-action="Index">BulkyBookWeb</a>
+                <a class="navbar-brand small" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="/images/book.png" style="width:30px"/>
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -50,27 +53,19 @@
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a></li>
                                     <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register" >Create User</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Manage User</a></li>
                                 </ul>
                             </li>
                         }
-                        @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart) != null)
-                        {
+                      
+                       
                             <li class="nav-item">
                                 <a class="nav-link small" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-                                    <i class="bi bi-cart"></i>&nbsp;
-                                (@HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart))    
+                                   @await Component.InvokeAsync("ShoppingCart")
                                 </a>
                             </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link small" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-                                    <i class="bi bi-cart"></i>&nbsp;
-                                   (0)
-                                </a>
-                            </li>
-                        }
+                        
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -91,15 +86,22 @@
         Made with <i class="bi bi-heart-fill text-danger"></i> by Tilak Bhusal
     </footer>
  *@
-   
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="https://cdn.tiny.cloud/1/dq0x96oj2wn1vsanboklymz2pgf3wsrcs1siukq0tfa3emoi/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

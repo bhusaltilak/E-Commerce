@@ -71,29 +71,29 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             else
             {
                 return View(companyObj);
+            }
         }
-    } 
 
 
-       
+
 
         #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
         {
             List<Company> objCompanyList = _unitOfWork.Company.GetAll().ToList();
-            return Json(new {data= objCompanyList});
+            return Json(new { data = objCompanyList });
         }
 
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            var companyToBeDeleted = _unitOfWork.Company.Get(u=>u.Id == id);
+            var companyToBeDeleted = _unitOfWork.Company.Get(u => u.Id == id);
             if (companyToBeDeleted == null)
             {
                 return Json(new { success = false, message = "Error while deleting" });
             }
-  
+
             _unitOfWork.Company.Remove(companyToBeDeleted);
             _unitOfWork.Save();
 
